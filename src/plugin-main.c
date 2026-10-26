@@ -23,6 +23,10 @@ with this program. If not, see <https://www.gnu.org/licenses/>
  *
  * Requests (requests.c):
  *   GetVersion -> { version, api, obsVersion }
+ *   GetProperties, PressPropertyButton (properties.c)
+ *   GetSceneItemExtras, SetSceneItemScaleFilter, SetSceneItemTransition,
+ *   GetTransitionKinds (sceneitems.c)
+ *   InteractMouse, InteractKey (interact.c)
  */
 
 #include <obs-module.h>
