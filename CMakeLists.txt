@@ -34,6 +34,7 @@ if(ENABLE_QT)
   )
 endif()
 
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.c src/requests.c src/properties.c src/sceneitems.c src/interact.c)
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.c src/requests.c src/properties.c src/sceneitems.c src/interact.c src/feed.c)
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE bcrypt advapi32)
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})

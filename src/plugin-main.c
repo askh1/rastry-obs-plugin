@@ -27,6 +27,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
  *   GetSceneItemExtras, SetSceneItemScaleFilter, SetSceneItemTransition,
  *   GetTransitionKinds (sceneitems.c)
  *   InteractMouse, InteractKey (interact.c)
+ *   GetPreviewEncoders, StartPreviewFeed, StopPreviewFeed (feed.c)
  */
 
 #include <obs-module.h>
@@ -34,6 +35,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 
 #include "obs-websocket-api.h"
 #include "requests.h"
+#include "feed.h"
 
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
@@ -45,6 +47,7 @@ MODULE_EXPORT const char *obs_module_description(void)
 
 bool obs_module_load(void)
 {
+	rastry_feed_load();
 	obs_log(LOG_INFO, "loaded (version %s)", PLUGIN_VERSION);
 	return true;
 }
@@ -62,5 +65,6 @@ void obs_module_post_load(void)
 
 void obs_module_unload(void)
 {
+	rastry_feed_unload();
 	obs_log(LOG_INFO, "unloaded");
 }

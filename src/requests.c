@@ -5,6 +5,7 @@
 #include "properties.h"
 #include "sceneitems.h"
 #include "interact.h"
+#include "feed.h"
 
 // Which plugin and OBS: RastryControl checks it is there and up to date
 static void get_version(obs_data_t *request, obs_data_t *response, void *data)
@@ -31,6 +32,9 @@ void rastry_register_requests(obs_websocket_vendor vendor)
 		{"GetTransitionKinds", rastry_get_transition_kinds},
 		{"InteractMouse", rastry_interact_mouse},
 		{"InteractKey", rastry_interact_key},
+		{"GetPreviewEncoders", rastry_get_preview_encoders},
+		{"StartPreviewFeed", rastry_start_preview_feed},
+		{"StopPreviewFeed", rastry_stop_preview_feed},
 	};
 	for (size_t i = 0; i < sizeof(requests) / sizeof(requests[0]); i++) {
 		if (!obs_websocket_vendor_register_request(vendor, requests[i].name, requests[i].callback, NULL))
