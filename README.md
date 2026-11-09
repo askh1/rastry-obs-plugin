@@ -1,59 +1,30 @@
-# OBS Plugin Template
+# Rastry for OBS
 
-## Introduction
+The OBS plugin RastryControl ships and installs on request: what RastryControl needs from OBS that obs-websocket does not offer. It opens nothing on screen; everything is data in, data out, as obs-websocket vendor requests of the vendor `rastry` (`CallVendorRequest`).
 
-The plugin template is meant to be used as a starting point for OBS Studio plugin development. It includes:
+Version 0.2.0, built against the OBS 31.1.1 SDK (`buildspec.json`). GPL-2.0-or-later (`LICENSE`); the repo is made public before RastryControl is published (Rastry repo, `docs/ESTADO.md`, step 50).
 
-* Boilerplate plugin source code
-* A CMake project file
-* GitHub Actions workflows and repository actions
+## Requests
 
-## Supported Build Environments
+| Request | File | What |
+|---|---|---|
+| `GetVersion` | `requests.c` | `{ version, api, obsVersion }`, so RastryControl can update it |
+| `GetProperties`, `PressPropertyButton` | `properties.c` | A source's exact property form, and its buttons |
+| `GetSceneItemExtras`, `SetSceneItemScaleFilter`, `SetSceneItemTransition`, `GetTransitionKinds` | `sceneitems.c` | Scale filtering and show / hide transitions per scene item |
+| `InteractMouse`, `InteractKey` | `interact.c` | Interacting with browser sources |
+| `GetPreviewEncoders`, `StartPreviewFeed`, `StopPreviewFeed` | `feed.c` | The moderators' preview: a scene rendered by OBS and encoded on the GPU by the best encoder the PC really has, over a named pipe only this Windows user can open; it stops by itself when nobody reads it |
 
-| Platform  | Tool   |
-|-----------|--------|
-| Windows   | Visual Studio 17 2022 |
-| macOS     | XCode 16.0 |
-| Windows, macOS  | CMake 3.30.5 |
-| Ubuntu 24.04 | CMake 3.28.3 |
-| Ubuntu 24.04 | `ninja-build` |
-| Ubuntu 24.04 | `pkg-config`
-| Ubuntu 24.04 | `build-essential` |
+## Build (Windows)
 
-## Quick Start
+Visual Studio 2022 with C++ and CMake 3.30 or later:
 
-An absolute bare-bones [Quick Start Guide](https://github.com/obsproject/obs-plugintemplate/wiki/Quick-Start-Guide) is available in the wiki.
+```bash
+cmake --preset windows-x64
+cmake --build --preset windows-x64 --config RelWithDebInfo
+```
 
-## Documentation
+The first configure downloads the OBS sources and their dependencies (`.deps`, regenerated when deleted).
 
-All documentation can be found in the [Plugin Template Wiki](https://github.com/obsproject/obs-plugintemplate/wiki).
+## Install
 
-Suggested reading to get up and running:
-
-* [Getting started](https://github.com/obsproject/obs-plugintemplate/wiki/Getting-Started)
-* [Build system requirements](https://github.com/obsproject/obs-plugintemplate/wiki/Build-System-Requirements)
-* [Build system options](https://github.com/obsproject/obs-plugintemplate/wiki/CMake-Build-System-Options)
-
-## GitHub Actions & CI
-
-Default GitHub Actions workflows are available for the following repository actions:
-
-* `push`: Run for commits or tags pushed to `master` or `main` branches.
-* `pr-pull`: Run when a Pull Request has been pushed or synchronized.
-* `dispatch`: Run when triggered by the workflow dispatch in GitHub's user interface.
-* `build-project`: Builds the actual project and is triggered by other workflows.
-* `check-format`: Checks CMake and plugin source code formatting and is triggered by other workflows.
-
-The workflows make use of GitHub repository actions (contained in `.github/actions`) and build scripts (contained in `.github/scripts`) which are not needed for local development, but might need to be adjusted if additional/different steps are required to build the plugin.
-
-### Retrieving build artifacts
-
-Successful builds on GitHub Actions will produce build artifacts that can be downloaded for testing. These artifacts are commonly simple archives and will not contain package installers or installation programs.
-
-### Building a Release
-
-To create a release, an appropriately named tag needs to be pushed to the `main`/`master` branch using semantic versioning (e.g., `12.3.4`, `23.4.5-beta2`). A draft release will be created on the associated repository with generated installer packages or installation programs attached as release artifacts.
-
-## Signing and Notarizing on macOS
-
-Basic concepts of codesigning and notarization on macOS are explained in the correspodning [Wiki article](https://github.com/obsproject/obs-plugintemplate/wiki/Codesigning-On-macOS) which has a specific section for the [GitHub Actions setup](https://github.com/obsproject/obs-plugintemplate/wiki/Codesigning-On-macOS#setting-up-code-signing-for-github-actions).
+RastryControl copies it to `%ProgramData%\obs-studio\plugins\rastry-obs\` (`bin\64bit`, `data`) when the streamer asks for it, and updates it with OBS open (`src-tauri/src/obs_plugin.rs` in RastryControl). By hand: copy the built `rastry-obs.dll` and `data/` to that folder and restart OBS. Its log lines start with `[rastry-obs]`.
