@@ -9,6 +9,7 @@
  *   SetSceneItemTransition { sceneName, sceneItemId, show, kind?, duration? }
  *     show: true for showing, false for hiding; no kind = none
  *   GetTransitionKinds -> { kinds: [{ kind, name }] }
+ *   CreateGroup { sceneName, groupName, sources: [{ name }] } -> { sceneItemId }
  */
 
 #include <obs-module.h>
@@ -127,4 +128,56 @@ void rastry_get_transition_kinds(obs_data_t *request, obs_data_t *response, void
 	}
 	obs_data_set_array(response, "kinds", kinds);
 	obs_data_array_release(kinds);
+}
+
+/*
+ * CreateGroup { sceneName, groupName, sources: [{ name }] } -> { sceneItemId }
+ * Puts those sources of the scene into a new group (obs-websocket cannot make
+ * groups). Sources not in the scene are left out; none found is an error.
+ */
+void rastry_create_group(obs_data_t *request, obs_data_t *response, void *data)
+{
+	UNUSED_PARAMETER(data);
+	const char *group_name = obs_data_get_string(request, "groupName");
+	if (!group_name || !*group_name) {
+		obs_data_set_string(response, "error", "No group name.");
+		return;
+	}
+	obs_source_t *taken = obs_get_source_by_name(group_name);
+	if (taken) {
+		obs_source_release(taken);
+		obs_data_set_string(response, "error", "Something in OBS already has that name.");
+		return;
+	}
+	obs_source_t *source = obs_get_source_by_name(obs_data_get_string(request, "sceneName"));
+	obs_scene_t *scene = source ? obs_scene_from_source(source) : NULL;
+	obs_data_array_t *sources = obs_data_get_array(request, "sources");
+	size_t count = sources ? obs_data_array_count(sources) : 0;
+	if (!scene || count == 0) {
+		obs_data_set_string(response, "error", scene ? "No sources to group." : "No scene with that name.");
+		obs_data_array_release(sources);
+		obs_source_release(source);
+		return;
+	}
+	obs_sceneitem_t **items = bzalloc(sizeof(*items) * count);
+	size_t found = 0;
+	for (size_t i = 0; i < count; i++) {
+		obs_data_t *entry = obs_data_array_item(sources, i);
+		obs_sceneitem_t *item = obs_scene_find_source(scene, obs_data_get_string(entry, "name"));
+		if (item)
+			items[found++] = item;
+		obs_data_release(entry);
+	}
+	if (found == 0) {
+		obs_data_set_string(response, "error", "None of those sources is in the scene.");
+	} else {
+		obs_sceneitem_t *group = obs_scene_insert_group(scene, group_name, items, found);
+		if (group)
+			obs_data_set_int(response, "sceneItemId", obs_sceneitem_get_id(group));
+		else
+			obs_data_set_string(response, "error", "OBS could not make the group.");
+	}
+	bfree(items);
+	obs_data_array_release(sources);
+	obs_source_release(source);
 }

@@ -30,6 +30,7 @@ void rastry_register_requests(obs_websocket_vendor vendor)
 		{"SetSceneItemScaleFilter", rastry_set_sceneitem_scale_filter},
 		{"SetSceneItemTransition", rastry_set_sceneitem_transition},
 		{"GetTransitionKinds", rastry_get_transition_kinds},
+		{"CreateGroup", rastry_create_group},
 		{"InteractMouse", rastry_interact_mouse},
 		{"InteractKey", rastry_interact_key},
 		{"GetPreviewEncoders", rastry_get_preview_encoders},
